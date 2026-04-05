@@ -82,47 +82,47 @@ class Router
 Router::register('GET',    '/auth',                        [AuthController::class,           'login'],        false, '');
 
 // Live data (mocked sensor values)
-Router::register('GET',    '/data',                        [DataController::class,           'readData'],     true,  '/api/v1/data');
-Router::register('GET',    '/data/{screen_id}',            [DataController::class,           'readData'],     true,  '/api/v1/data');
+Router::register('GET',    '/data',                        [DataController::class,           'readData'],     true,  '/v1/data');
+Router::register('GET',    '/data/{screen_id}',            [DataController::class,           'readData'],     true,  '/v1/data');
 
 // Users
-Router::register('GET',    '/users',                       [UserController::class,           'getAll'],       true,  '/api/v1/users');
-Router::register('GET',    '/users/{user_id}',             [UserController::class,           'getOne'],       true,  '/api/v1/users/:id');
-Router::register('POST',   '/users',                       [UserController::class,           'create'],       true,  '/api/v1/users');
-Router::register('PUT',    '/users/{user_id}',             [UserController::class,           'update'],       true,  '/api/v1/users/:id');
-Router::register('DELETE', '/users/{user_id}',             [UserController::class,           'delete'],       true,  '/api/v1/users/:id');
-Router::register('POST',   '/users/{user_id}/roles',       [UserController::class,           'assignRoles'],  true,  '/api/v1/users/:id/roles');
-Router::register('POST',   '/users/{user_id}/groups',      [UserController::class,           'assignGroups'], true,  '/api/v1/users/:id/groups');
+Router::register('GET',    '/users',                       [UserController::class,           'getAll'],       true,  '/v1/users');
+Router::register('GET',    '/users/{user_id}',             [UserController::class,           'getOne'],       true,  '/v1/users/:id');
+Router::register('POST',   '/users',                       [UserController::class,           'create'],       true,  '/v1/users');
+Router::register('PUT',    '/users/{user_id}',             [UserController::class,           'update'],       true,  '/v1/users/:id');
+Router::register('DELETE', '/users/{user_id}',             [UserController::class,           'delete'],       true,  '/v1/users/:id');
+Router::register('POST',   '/users/{user_id}/roles',       [UserController::class,           'assignRoles'],  true,  '/v1/users/:id/roles');
+Router::register('POST',   '/users/{user_id}/groups',      [UserController::class,           'assignGroups'], true,  '/v1/users/:id/groups');
 
 // Screens
-Router::register('GET',    '/screen',                      [ScreenController::class,         'getAll'],       true,  '/api/v1/screen');
-Router::register('GET',    '/screen/{screen_id}',          [ScreenController::class,         'getOne'],       true,  '/api/v1/screen/:id');
-Router::register('POST',   '/screen',                      [ScreenController::class,         'create'],       true,  '/api/v1/screen');
-Router::register('PUT',    '/screen/{screen_id}',          [ScreenController::class,         'update'],       true,  '/api/v1/screen/:id');
-Router::register('DELETE', '/screen/{screen_id}',          [ScreenController::class,         'delete'],       true,  '/api/v1/screen/:id');
+Router::register('GET',    '/screen',                      [ScreenController::class,         'getAll'],       true,  '/v1/screen');
+Router::register('GET',    '/screen/{screen_id}',          [ScreenController::class,         'getOne'],       true,  '/v1/screen/:id');
+Router::register('POST',   '/screen',                      [ScreenController::class,         'create'],       true,  '/v1/screen');
+Router::register('PUT',    '/screen/{screen_id}',          [ScreenController::class,         'update'],       true,  '/v1/screen/:id');
+Router::register('DELETE', '/screen/{screen_id}',          [ScreenController::class,         'delete'],       true,  '/v1/screen/:id');
 
 // Indicators (values) — order matters: most specific first
-Router::register('GET',    '/indicators/{screen_id}/{ind_id}', [IndicatorController::class,  'getValues'],    true,  '/api/v1/indicators/:screen_id/:ind_id');
-Router::register('GET',    '/indicators/{screen_id}',          [IndicatorController::class,  'getValues'],    true,  '/api/v1/indicators/:screen_id');
-Router::register('GET',    '/indicators',                      [IndicatorController::class,  'getValues'],    true,  '/api/v1/indicators');
-Router::register('POST',   '/position/{ind_id}',               [IndicatorController::class,  'setPosition'],  true,  '/api/v1/position/:ind_id');
+Router::register('GET',    '/indicators/{screen_id}/{ind_id}', [IndicatorController::class,  'getValues'],    true,  '/v1/indicators/:screen_id/:ind_id');
+Router::register('GET',    '/indicators/{screen_id}',          [IndicatorController::class,  'getValues'],    true,  '/v1/indicators/:screen_id');
+Router::register('GET',    '/indicators',                      [IndicatorController::class,  'getValues'],    true,  '/v1/indicators');
+Router::register('POST',   '/position/{ind_id}',               [IndicatorController::class,  'setPosition'],  true,  '/v1/position/:ind_id');
 
 // Roles
-Router::register('GET',    '/roles',                       [RoleController::class,           'getRoles'],     true,  '/api/v1/roles');
-Router::register('POST',   '/roles',                       [RoleController::class,           'createRole'],   true,  '/api/v1/roles');
-Router::register('PUT',    '/roles/{role_id}',             [RoleController::class,           'updateRole'],   true,  '/api/v1/roles/:id');
-Router::register('DELETE', '/roles/{role_id}',             [RoleController::class,           'deleteRole'],   true,  '/api/v1/roles/:id');
+Router::register('GET',    '/roles',                       [RoleController::class,           'getRoles'],     true,  '/v1/roles');
+Router::register('POST',   '/roles',                       [RoleController::class,           'createRole'],   true,  '/v1/roles');
+Router::register('PUT',    '/roles/{role_id}',             [RoleController::class,           'updateRole'],   true,  '/v1/roles/:id');
+Router::register('DELETE', '/roles/{role_id}',             [RoleController::class,           'deleteRole'],   true,  '/v1/roles/:id');
 
 // Groups
-Router::register('GET',    '/groups',                      [RoleController::class,           'getGroups'],    true,  '/api/v1/groups');
-Router::register('POST',   '/groups',                      [RoleController::class,           'createGroup'],  true,  '/api/v1/groups');
-Router::register('PUT',    '/groups/{group_id}',           [RoleController::class,           'updateGroup'],  true,  '/api/v1/groups/:id');
-Router::register('DELETE', '/groups/{group_id}',           [RoleController::class,           'deleteGroup'],  true,  '/api/v1/groups/:id');
+Router::register('GET',    '/groups',                      [RoleController::class,           'getGroups'],    true,  '/v1/groups');
+Router::register('POST',   '/groups',                      [RoleController::class,           'createGroup'],  true,  '/v1/groups');
+Router::register('PUT',    '/groups/{group_id}',           [RoleController::class,           'updateGroup'],  true,  '/v1/groups/:id');
+Router::register('DELETE', '/groups/{group_id}',           [RoleController::class,           'deleteGroup'],  true,  '/v1/groups/:id');
 
 // Logs
-Router::register('GET',    '/logs',                        [LogController::class,            'getLogs'],      true,  '/api/v1/logs');
-Router::register('DELETE', '/logs',                        [LogController::class,            'clearLogs'],    true,  '/api/v1/logs');
+Router::register('GET',    '/logs',                        [LogController::class,            'getLogs'],      true,  '/v1/logs');
+Router::register('DELETE', '/logs',                        [LogController::class,            'clearLogs'],    true,  '/v1/logs');
 
 // Backend commands & controls (read-only for now)
-Router::register('GET',    '/commands',                    [BackendCommandController::class,  'getAll'],      true,  '/api/v1/commands');
-Router::register('GET',    '/controls',                    [ControlController::class,         'getAll'],      true,  '/api/v1/controls');
+Router::register('GET',    '/commands',                    [BackendCommandController::class,  'getAll'],      true,  '/v1/commands');
+Router::register('GET',    '/controls',                    [ControlController::class,         'getAll'],      true,  '/v1/controls');

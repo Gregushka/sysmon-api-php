@@ -43,8 +43,8 @@ CorsMiddleware::handle();
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $uri    = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
-// Strip /api/v1 prefix — all valid routes live under it
-$prefix = '/api/' . APP_VERSION;   // '/api/v1'
+// Strip version prefix — all valid routes live under /v1/ (or /v2/ etc.)
+$prefix = '/' . APP_VERSION;   // '/v1'
 if (!str_starts_with($uri, $prefix)) {
     ResponseHelper::error(-1, 'Invalid API path. Expected prefix: ' . $prefix, 404);
 }

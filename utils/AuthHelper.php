@@ -121,7 +121,7 @@ class AuthHelper
      *
      * @param array  $roles   Array of role rows from getUserRoles()
      * @param string $method  HTTP method
-     * @param string $command Normalised path pattern (e.g. /api/v1/users)
+     * @param string $command Normalised path pattern (e.g. /v1/users)
      */
     public static function isPermitted(array $roles, string $method, string $command): bool
     {

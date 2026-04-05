@@ -8,7 +8,7 @@ class AuthMiddleware
      * @param string $method   HTTP method of the current request
      * @param string $path     Normalised API path (e.g. /users/5)
      * @param string $apiPath  Pattern path used for permission lookup
-     *                         (e.g. /api/v1/users/:id)
+     *                         (e.g. /v1/users/:id)
      *
      * @return array  Authenticated user row with roles attached
      */
@@ -33,7 +33,7 @@ class AuthMiddleware
 
         // Permission check (skip if no apiPath provided)
         if ($apiPath !== '') {
-            $fullApiPath = '/api/v1' . $apiPath;
+            $fullApiPath = '/' . APP_VERSION . $apiPath;
             if (!AuthHelper::isPermitted($roles, $method, $fullApiPath)) {
                 Logger::logError($method, $path, 'Permission denied', 403, $session);
                 ResponseHelper::forbidden('You do not have permission to perform this action');
