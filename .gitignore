@@ -1,0 +1,19 @@
+# Database (generated at runtime)
+db/sysmon.db
+db/sysmon.db-shm
+db/sysmon.db-wal
+db/.installed
+
+# Environment overrides
+.env
+.env.local
+
+# IDE / OS
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# PHP
+vendor/
+composer.lock
