@@ -1,9 +1,10 @@
 <?php
 // sysmon-api-php application configuration
 
-define('APP_VERSION',  'v1');
-define('APP_ENV',      getenv('APP_ENV') ?: 'development');  // development | production
-define('APP_DEBUG',    APP_ENV === 'development');
+define('APP_VERSION',            'v1');
+define('APP_SUPPORTED_VERSIONS', ['v1']);   // add 'v2' here when ready
+define('APP_ENV',                getenv('APP_ENV') ?: 'development');  // development | production
+define('APP_DEBUG',              APP_ENV === 'development');
 
 // Token TTL in seconds (24 hours)
 define('TOKEN_TTL', 86400);

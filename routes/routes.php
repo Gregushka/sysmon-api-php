@@ -6,13 +6,17 @@
  * Pattern syntax: literal segments and {name} placeholders.
  * Example: /users/{user_id}/roles
  *
- * Routes are tested in registration order; first match wins.
- * The $auth flag controls whether AuthMiddleware::check() is invoked.
- * The $apiPath is the permission-lookup pattern (maps to api_commands table).
+ * Version-specific route tables live in routes/v1.php, routes/v2.php, …
+ * index.php loads the correct file after extracting the version from the URI.
+ *
+ * The $apiPath argument to register() is the bare path pattern (no version prefix),
+ * e.g. '/users/:id'. AuthMiddleware prepends the active version at runtime so
+ * the lookup against api_commands resolves correctly: '/v1/users/:id'.
  */
 class Router
 {
-    private static array $routes = [];
+    private static array  $routes  = [];
+    private static string $version = '';
 
     public static function register(
         string $method,
@@ -24,9 +28,13 @@ class Router
         self::$routes[] = compact('method', 'pattern', 'handler', 'auth', 'apiPath');
     }
 
-    public static function dispatch(string $method, string $path): never
+    /**
+     * @param string $version  The detected version string, e.g. 'v1'
+     */
+    public static function dispatch(string $method, string $path, string $version): never
     {
-        $method = strtoupper($method);
+        self::$version = $version;
+        $method        = strtoupper($method);
 
         foreach (self::$routes as $route) {
             if (strtoupper($route['method']) !== $method) {
@@ -41,15 +49,14 @@ class Router
             // Authentication & permission check
             $user = null;
             if ($route['auth']) {
-                $user = AuthMiddleware::check($method, $path, $route['apiPath']);
+                $user = AuthMiddleware::check($method, $path, $route['apiPath'], $version);
             }
 
-            // Log the request (controllers may add richer log entries themselves)
+            // Lightweight log entry; controllers may add richer entries themselves
             Logger::logRequest($method, $path, $params, $user);
 
-            // Dispatch to controller
             call_user_func($route['handler'], $params, $user);
-            exit; // handler should have exited via ResponseHelper, but be safe
+            exit; // handler should exit via ResponseHelper, but guard anyway
         }
 
         Logger::logError($method, $path, 'Route not found', 404);
@@ -58,8 +65,8 @@ class Router
 
     private static function match(string $pattern, string $path): ?array
     {
-        $regex  = preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $pattern);
-        $regex  = '#^' . $regex . '$#u';
+        $regex = preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $pattern);
+        $regex = '#^' . $regex . '$#u';
 
         if (!preg_match($regex, $path, $matches)) {
             return null;
@@ -74,55 +81,3 @@ class Router
         return $params;
     }
 }
-
-// ─── Route definitions ───────────────────────────────────────────────────────
-// Format: method, path-pattern, [ControllerClass, method], requiresAuth, apiPathPattern
-
-// Auth (no token required)
-Router::register('GET',    '/auth',                        [AuthController::class,           'login'],        false, '');
-
-// Live data (mocked sensor values)
-Router::register('GET',    '/data',                        [DataController::class,           'readData'],     true,  '/v1/data');
-Router::register('GET',    '/data/{screen_id}',            [DataController::class,           'readData'],     true,  '/v1/data');
-
-// Users
-Router::register('GET',    '/users',                       [UserController::class,           'getAll'],       true,  '/v1/users');
-Router::register('GET',    '/users/{user_id}',             [UserController::class,           'getOne'],       true,  '/v1/users/:id');
-Router::register('POST',   '/users',                       [UserController::class,           'create'],       true,  '/v1/users');
-Router::register('PUT',    '/users/{user_id}',             [UserController::class,           'update'],       true,  '/v1/users/:id');
-Router::register('DELETE', '/users/{user_id}',             [UserController::class,           'delete'],       true,  '/v1/users/:id');
-Router::register('POST',   '/users/{user_id}/roles',       [UserController::class,           'assignRoles'],  true,  '/v1/users/:id/roles');
-Router::register('POST',   '/users/{user_id}/groups',      [UserController::class,           'assignGroups'], true,  '/v1/users/:id/groups');
-
-// Screens
-Router::register('GET',    '/screen',                      [ScreenController::class,         'getAll'],       true,  '/v1/screen');
-Router::register('GET',    '/screen/{screen_id}',          [ScreenController::class,         'getOne'],       true,  '/v1/screen/:id');
-Router::register('POST',   '/screen',                      [ScreenController::class,         'create'],       true,  '/v1/screen');
-Router::register('PUT',    '/screen/{screen_id}',          [ScreenController::class,         'update'],       true,  '/v1/screen/:id');
-Router::register('DELETE', '/screen/{screen_id}',          [ScreenController::class,         'delete'],       true,  '/v1/screen/:id');
-
-// Indicators (values) — order matters: most specific first
-Router::register('GET',    '/indicators/{screen_id}/{ind_id}', [IndicatorController::class,  'getValues'],    true,  '/v1/indicators/:screen_id/:ind_id');
-Router::register('GET',    '/indicators/{screen_id}',          [IndicatorController::class,  'getValues'],    true,  '/v1/indicators/:screen_id');
-Router::register('GET',    '/indicators',                      [IndicatorController::class,  'getValues'],    true,  '/v1/indicators');
-Router::register('POST',   '/position/{ind_id}',               [IndicatorController::class,  'setPosition'],  true,  '/v1/position/:ind_id');
-
-// Roles
-Router::register('GET',    '/roles',                       [RoleController::class,           'getRoles'],     true,  '/v1/roles');
-Router::register('POST',   '/roles',                       [RoleController::class,           'createRole'],   true,  '/v1/roles');
-Router::register('PUT',    '/roles/{role_id}',             [RoleController::class,           'updateRole'],   true,  '/v1/roles/:id');
-Router::register('DELETE', '/roles/{role_id}',             [RoleController::class,           'deleteRole'],   true,  '/v1/roles/:id');
-
-// Groups
-Router::register('GET',    '/groups',                      [RoleController::class,           'getGroups'],    true,  '/v1/groups');
-Router::register('POST',   '/groups',                      [RoleController::class,           'createGroup'],  true,  '/v1/groups');
-Router::register('PUT',    '/groups/{group_id}',           [RoleController::class,           'updateGroup'],  true,  '/v1/groups/:id');
-Router::register('DELETE', '/groups/{group_id}',           [RoleController::class,           'deleteGroup'],  true,  '/v1/groups/:id');
-
-// Logs
-Router::register('GET',    '/logs',                        [LogController::class,            'getLogs'],      true,  '/v1/logs');
-Router::register('DELETE', '/logs',                        [LogController::class,            'clearLogs'],    true,  '/v1/logs');
-
-// Backend commands & controls (read-only for now)
-Router::register('GET',    '/commands',                    [BackendCommandController::class,  'getAll'],      true,  '/v1/commands');
-Router::register('GET',    '/controls',                    [ControlController::class,         'getAll'],      true,  '/v1/controls');
