@@ -40,7 +40,18 @@ CorsMiddleware::handle();
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $uri    = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
-// URI must start with /v{n}/  or be exactly /v{n}
+// Strip the subdirectory base path so the app works at any mount point.
+// e.g. deployed at /scada/sysmon-api/ → strip that prefix before matching.
+// dirname(SCRIPT_NAME) gives '/scada/sysmon-api'; rtrim removes trailing slash.
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+if ($basePath !== '' && str_starts_with($uri, $basePath)) {
+    $uri = substr($uri, strlen($basePath));
+}
+if ($uri === '' || $uri === false) {
+    $uri = '/';
+}
+
+// URI is now relative to the app root, e.g. /v1/auth
 if (!preg_match('#^/(v\d+)(/.*)?$#', $uri, $m)) {
     ResponseHelper::error(-1, 'Missing or invalid API version in URL. Example: /v1/auth', 404);
 }
