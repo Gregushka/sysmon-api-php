@@ -4,8 +4,8 @@ class AuthController
 {
     public static function login(array $params, ?array $user): never
     {
-        $login = trim($_GET['l'] ?? '');
-        $pwd   = trim($_GET['p'] ?? '');
+        $login = trim($_GET['login'] ?? $_GET['l'] ?? '');
+        $pwd   = trim($_GET['password'] ?? $_GET['p'] ?? '');
 
         if ($login === '' || $pwd === '') {
             Logger::logError('GET', '/auth', 'Missing credentials', 400);

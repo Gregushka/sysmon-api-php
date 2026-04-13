@@ -60,3 +60,7 @@ Router::register('DELETE', '/logs',                        [LogController::class
 // Backend commands & controls
 Router::register('GET',    '/commands',                    [BackendCommandController::class,  'getAll'],      true,  '/commands');
 Router::register('GET',    '/controls',                    [ControlController::class,         'getAll'],      true,  '/controls');
+
+// User app settings (all authenticated roles)
+Router::register('GET',    '/settings',                    [SettingsController::class,        'getSettings'], true,  '/settings');
+Router::register('POST',   '/settings',                    [SettingsController::class,        'saveSettings'],true,  '/settings');
