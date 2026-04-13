@@ -6,10 +6,10 @@ class SettingsController
      * GET /settings
      * Returns the authenticated user's app settings merged with defaults.
      */
-    public static function getSettings(array $params, array $user): void
+    public static function getSettings(array $params, array $user): never
     {
         $settings = UserAppSettingsRepository::getForUser((int)$user['user_id']);
-        ResponseHelper::success($settings);
+        ResponseHelper::send(['status_code' => 0, 'settings' => $settings]);
     }
 
     /**
@@ -17,7 +17,7 @@ class SettingsController
      * Body: { message_text_size?, message_text_color?, message_window_lines? }
      * Saves and returns merged settings.
      */
-    public static function saveSettings(array $params, array $user): void
+    public static function saveSettings(array $params, array $user): never
     {
         $body = ValidationHelper::parseJsonBody();
 
