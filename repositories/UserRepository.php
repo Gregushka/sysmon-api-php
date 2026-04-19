@@ -97,7 +97,7 @@ class UserRepository
         $del = $this->db->prepare('DELETE FROM user_roles_map WHERE user_id = :uid');
         $del->execute([':uid' => $userId]);
 
-        $ins = $this->db->prepare('INSERT OR IGNORE INTO user_roles_map (user_id, role_id) VALUES (:uid, :rid)');
+        $ins = $this->db->prepare('INSERT IGNORE INTO user_roles_map (user_id, role_id) VALUES (:uid, :rid)');
         foreach ($roleIds as $rid) {
             $ins->execute([':uid' => $userId, ':rid' => (int)$rid]);
         }
@@ -108,7 +108,7 @@ class UserRepository
         $del = $this->db->prepare('DELETE FROM user_groups_map WHERE user_id = :uid');
         $del->execute([':uid' => $userId]);
 
-        $ins = $this->db->prepare('INSERT OR IGNORE INTO user_groups_map (user_id, group_id) VALUES (:uid, :gid)');
+        $ins = $this->db->prepare('INSERT IGNORE INTO user_groups_map (user_id, group_id) VALUES (:uid, :gid)');
         foreach ($groupIds as $gid) {
             $ins->execute([':uid' => $userId, ':gid' => (int)$gid]);
         }

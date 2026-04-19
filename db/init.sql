@@ -1,206 +1,257 @@
--- sysmon-api-php: database schema
+-- sysmon-api-php: MySQL database schema
 -- Run once via setup/install.php
--- PRAGMAs are set by Database::get() on every connection; omitted here.
 
--- Lookup tables
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ─── Lookup tables ────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS screen_types (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL UNIQUE,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
     description TEXT,
-    settings    JSON
-);
+    settings    JSON,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_screen_types_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS indicator_types (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL UNIQUE,
-    front_name  TEXT    NOT NULL,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
+    front_name  VARCHAR(100) NOT NULL,
     description TEXT,
-    settings    JSON
-);
+    settings    JSON,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_indicator_types_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS units (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    name    TEXT    NOT NULL,
-    symbol  TEXT    NOT NULL,
-    units   TEXT
-);
+    id      INT          NOT NULL AUTO_INCREMENT,
+    name    VARCHAR(100) NOT NULL,
+    symbol  VARCHAR(20)  NOT NULL,
+    units   VARCHAR(50),
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS control_types (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL,
-    front_name  TEXT,
-    description TEXT
-);
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
+    front_name  VARCHAR(100),
+    description TEXT,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── Core entities ───────────────────────────────────────────────────────────
+-- ─── Core entities ────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS screens (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    type_id     INTEGER NOT NULL REFERENCES screen_types(id),
-    name        TEXT    NOT NULL,
-    description TEXT    NOT NULL DEFAULT '',
-    tab_header  TEXT,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    type_id     INT          NOT NULL,
+    name        VARCHAR(255) NOT NULL,
+    description VARCHAR(500) NOT NULL DEFAULT '',
+    tab_header  VARCHAR(100),
     background  VARCHAR(255),
-    settings    JSON    NOT NULL DEFAULT '{}'
-);
+    settings    JSON         NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_screens_type FOREIGN KEY (type_id) REFERENCES screen_types(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS aggregates (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL UNIQUE,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
     description TEXT,
-    settings    JSON
-);
+    settings    JSON,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_aggregates_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS indicators (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    ind_id      TEXT    NOT NULL,
-    data_id     TEXT,
-    type_id     INTEGER NOT NULL REFERENCES indicator_types(id),
-    label       TEXT,
-    unit_id     INTEGER REFERENCES units(id),
-    top         INTEGER,
-    left        INTEGER,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    ind_id      VARCHAR(100) NOT NULL,
+    data_id     VARCHAR(100),
+    type_id     INT          NOT NULL,
+    label       VARCHAR(100),
+    unit_id     INT,
+    top         INT,
+    `left`      INT,
     label_font  JSON,
     unit_font   JSON,
     value_font  JSON,
-    radius      INTEGER,
-    size        INTEGER,
+    radius      INT,
+    size        INT,
     box         JSON,
-    settings    JSON
-);
+    settings    JSON,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_indicators_type FOREIGN KEY (type_id) REFERENCES indicator_types(id),
+    CONSTRAINT fk_indicators_unit FOREIGN KEY (unit_id) REFERENCES units(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS controls (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL,
-    front_name  TEXT,
-    type_id     INTEGER REFERENCES control_types(id),
-    description TEXT
-);
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
+    front_name  VARCHAR(100),
+    type_id     INT,
+    description TEXT,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_controls_type FOREIGN KEY (type_id) REFERENCES control_types(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS backend_commands (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    command     TEXT    NOT NULL UNIQUE,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    command     VARCHAR(100) NOT NULL,
     response    TEXT,
-    description TEXT
-);
+    description TEXT,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_backend_commands_command (command)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── Roles & groups ──────────────────────────────────────────────────────────
+-- ─── Roles & groups ───────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS roles (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL UNIQUE,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
     description TEXT,
-    permissions JSON
-);
+    permissions JSON,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_roles_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS groups (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT    NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS `groups` (
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(100) NOT NULL,
     description TEXT,
-    permissions JSON
-);
+    permissions JSON,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_groups_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── Users ───────────────────────────────────────────────────────────────────
+-- ─── Users ────────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS users (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    login       TEXT        NOT NULL UNIQUE,
-    password    TEXT        NOT NULL,  -- bcrypt(sha256(plain))
+    id          INT          NOT NULL AUTO_INCREMENT,
+    login       VARCHAR(100) NOT NULL,
+    password    VARCHAR(255) NOT NULL,
     fname       VARCHAR(50),
     lname       VARCHAR(50),
     pname       VARCHAR(50),
-    position    VARCHAR(255)
-);
+    position    VARCHAR(255),
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_users_login (login)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Multi-session token store
 CREATE TABLE IF NOT EXISTS sessions (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token       TEXT    NOT NULL UNIQUE,
-    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    expires_at  DATETIME NOT NULL,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    user_id     INT          NOT NULL,
+    token       VARCHAR(255) NOT NULL,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at  DATETIME     NOT NULL,
     ip          VARCHAR(45),
-    user_agent  TEXT
-);
+    user_agent  TEXT,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_sessions_token (token),
+    CONSTRAINT fk_sessions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── M:N junction tables ─────────────────────────────────────────────────────
+-- ─── M:N junction tables ──────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS user_roles_map (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
-    role_id INTEGER NOT NULL REFERENCES roles(id)  ON DELETE CASCADE,
-    UNIQUE(user_id, role_id)
-);
+    id      INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_roles (user_id, role_id),
+    CONSTRAINT fk_urm_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_urm_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS user_groups_map (
-    id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id  INTEGER NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
-    group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-    UNIQUE(user_id, group_id)
-);
+    id       INT NOT NULL AUTO_INCREMENT,
+    user_id  INT NOT NULL,
+    group_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_groups (user_id, group_id),
+    CONSTRAINT fk_ugm_user  FOREIGN KEY (user_id)  REFERENCES users(id)    ON DELETE CASCADE,
+    CONSTRAINT fk_ugm_group FOREIGN KEY (group_id) REFERENCES `groups`(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS user_screen (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id     INTEGER NOT NULL REFERENCES users(id)   ON DELETE CASCADE,
-    screen_id   INTEGER NOT NULL REFERENCES screens(id) ON DELETE CASCADE,
-    permissions JSON    NOT NULL DEFAULT '{"read":true,"control":false}',
-    UNIQUE(user_id, screen_id)
-);
+    id          INT  NOT NULL AUTO_INCREMENT,
+    user_id     INT  NOT NULL,
+    screen_id   INT  NOT NULL,
+    permissions JSON NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_screen (user_id, screen_id),
+    CONSTRAINT fk_us_user   FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
+    CONSTRAINT fk_us_screen FOREIGN KEY (screen_id) REFERENCES screens(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS screen_aggregate (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    screen_id    INTEGER NOT NULL REFERENCES screens(id)    ON DELETE CASCADE,
-    aggregate_id INTEGER NOT NULL REFERENCES aggregates(id) ON DELETE CASCADE,
-    UNIQUE(screen_id, aggregate_id)
-);
+    id           INT NOT NULL AUTO_INCREMENT,
+    screen_id    INT NOT NULL,
+    aggregate_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_screen_aggregate (screen_id, aggregate_id),
+    CONSTRAINT fk_sa_screen    FOREIGN KEY (screen_id)    REFERENCES screens(id)    ON DELETE CASCADE,
+    CONSTRAINT fk_sa_aggregate FOREIGN KEY (aggregate_id) REFERENCES aggregates(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- aggregate_indicator links by indicators.id (PK), ind_id is the business identifier
 CREATE TABLE IF NOT EXISTS aggregate_indicator (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    aggregate_id INTEGER NOT NULL REFERENCES aggregates(id)  ON DELETE CASCADE,
-    indicator_id INTEGER NOT NULL REFERENCES indicators(id)  ON DELETE CASCADE,
-    UNIQUE(aggregate_id, indicator_id)
-);
+    id           INT NOT NULL AUTO_INCREMENT,
+    aggregate_id INT NOT NULL,
+    indicator_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_aggregate_indicator (aggregate_id, indicator_id),
+    CONSTRAINT fk_ai_aggregate FOREIGN KEY (aggregate_id) REFERENCES aggregates(id)  ON DELETE CASCADE,
+    CONSTRAINT fk_ai_indicator FOREIGN KEY (indicator_id) REFERENCES indicators(id)  ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS group_screen (
-    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_id  INTEGER NOT NULL REFERENCES groups(id)  ON DELETE CASCADE,
-    screen_id INTEGER NOT NULL REFERENCES screens(id) ON DELETE CASCADE,
-    UNIQUE(group_id, screen_id)
-);
+    id        INT NOT NULL AUTO_INCREMENT,
+    group_id  INT NOT NULL,
+    screen_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_group_screen (group_id, screen_id),
+    CONSTRAINT fk_gs_group  FOREIGN KEY (group_id)  REFERENCES `groups`(id) ON DELETE CASCADE,
+    CONSTRAINT fk_gs_screen FOREIGN KEY (screen_id) REFERENCES screens(id)  ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS group_aggregate (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    group_id     INTEGER NOT NULL REFERENCES groups(id)     ON DELETE CASCADE,
-    aggregate_id INTEGER NOT NULL REFERENCES aggregates(id) ON DELETE CASCADE,
-    UNIQUE(group_id, aggregate_id)
-);
+    id           INT NOT NULL AUTO_INCREMENT,
+    group_id     INT NOT NULL,
+    aggregate_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_group_aggregate (group_id, aggregate_id),
+    CONSTRAINT fk_ga_group     FOREIGN KEY (group_id)     REFERENCES `groups`(id)    ON DELETE CASCADE,
+    CONSTRAINT fk_ga_aggregate FOREIGN KEY (aggregate_id) REFERENCES aggregates(id)  ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── API command permission system ───────────────────────────────────────────
+-- ─── API command permission system ────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS api_commands (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    id          INT          NOT NULL AUTO_INCREMENT,
     command     VARCHAR(255) NOT NULL,
     method      VARCHAR(10)  NOT NULL,
     description TEXT,
     parameters  JSON,
-    UNIQUE(command, method)
-);
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_api_commands (command, method)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS role_api_command (
-    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    role_id        INTEGER NOT NULL REFERENCES roles(id)        ON DELETE CASCADE,
-    api_command_id INTEGER NOT NULL REFERENCES api_commands(id) ON DELETE CASCADE,
-    UNIQUE(role_id, api_command_id)
-);
+    id             INT NOT NULL AUTO_INCREMENT,
+    role_id        INT NOT NULL,
+    api_command_id INT NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_role_api_command (role_id, api_command_id),
+    CONSTRAINT fk_rac_role    FOREIGN KEY (role_id)        REFERENCES roles(id)        ON DELETE CASCADE,
+    CONSTRAINT fk_rac_command FOREIGN KEY (api_command_id) REFERENCES api_commands(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── Logs ────────────────────────────────────────────────────────────────────
+-- ─── Logs ─────────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS logs (
-    id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    id                 INT          NOT NULL AUTO_INCREMENT,
     timestamp          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    error_level        INTEGER      NOT NULL DEFAULT 1,
+    error_level        INT          NOT NULL DEFAULT 1,
     caller_ip          VARCHAR(45),
     command            VARCHAR(255),
     method             VARCHAR(10),
@@ -210,36 +261,41 @@ CREATE TABLE IF NOT EXISTS logs (
     object_attribute   VARCHAR(50),
     data_was           JSON,
     data_is            JSON,
-    http_status_code   INTEGER
-);
+    http_status_code   INT,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── Settings ────────────────────────────────────────────────────────────────
+-- ─── Settings ─────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS user_app_settings (
-    id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id  INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-    settings JSON    NOT NULL DEFAULT '{}'
-);
+    id       INT  NOT NULL AUTO_INCREMENT,
+    user_id  INT  NOT NULL,
+    settings JSON NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_app_settings (user_id),
+    CONSTRAINT fk_uas_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Single-row application settings (enforced by CHECK)
 CREATE TABLE IF NOT EXISTS app_settings (
-    id                  INTEGER PRIMARY KEY DEFAULT 1 CHECK(id = 1),
-    display_screen      INTEGER NOT NULL DEFAULT 0,
-    status              INTEGER NOT NULL DEFAULT 0,
-    status_text         TEXT    NOT NULL DEFAULT 'OK',
-    system_status       INTEGER NOT NULL DEFAULT 0,
-    system_status_text  TEXT    NOT NULL DEFAULT 'System OK',
-    header              TEXT    NOT NULL DEFAULT 'SCADA System',
-    settings            JSON    NOT NULL DEFAULT '{}'
-);
+    id                  TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    display_screen      INT          NOT NULL DEFAULT 0,
+    status              INT          NOT NULL DEFAULT 0,
+    status_text         VARCHAR(255) NOT NULL DEFAULT 'OK',
+    system_status       INT          NOT NULL DEFAULT 0,
+    system_status_text  VARCHAR(255) NOT NULL DEFAULT 'System OK',
+    header              VARCHAR(255) NOT NULL DEFAULT 'SCADA System',
+    settings            JSON         NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ─── Indexes ─────────────────────────────────────────────────────────────────
+-- ─── Indexes ──────────────────────────────────────────────────────────────────
 
-CREATE INDEX IF NOT EXISTS idx_sessions_token      ON sessions(token);
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id    ON sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
-CREATE INDEX IF NOT EXISTS idx_logs_timestamp      ON logs(timestamp);
-CREATE INDEX IF NOT EXISTS idx_logs_error_level    ON logs(error_level);
-CREATE INDEX IF NOT EXISTS idx_aggind_aggregate    ON aggregate_indicator(aggregate_id);
-CREATE INDEX IF NOT EXISTS idx_scrnagg_screen      ON screen_aggregate(screen_id);
-CREATE INDEX IF NOT EXISTS idx_user_screen_user    ON user_screen(user_id);
+CREATE INDEX idx_sessions_user_id    ON sessions(user_id);
+CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
+CREATE INDEX idx_logs_timestamp      ON logs(timestamp);
+CREATE INDEX idx_logs_error_level    ON logs(error_level);
+CREATE INDEX idx_aggind_aggregate    ON aggregate_indicator(aggregate_id);
+CREATE INDEX idx_scrnagg_screen      ON screen_aggregate(screen_id);
+CREATE INDEX idx_user_screen_user    ON user_screen(user_id);
+
+SET FOREIGN_KEY_CHECKS = 1;

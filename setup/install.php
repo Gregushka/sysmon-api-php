@@ -19,13 +19,6 @@ class Install
      */
     public static function run(): void
     {
-        // Ensure DB directory exists and is writable
-        $dbDir = dirname(DB_PATH);
-        if (!is_dir($dbDir)) {
-            mkdir($dbDir, 0750, true);
-        }
-
-        // Run schema
         $pdo = Database::get();
         self::execSqlFile($pdo, DB_INIT_SQL);
 
@@ -60,8 +53,6 @@ class Install
             fn($s) => $s !== ''
         );
 
-        // Run DDL without an explicit transaction wrapper —
-        // SQLite auto-commits DDL and PRAGMAs cannot run inside transactions.
         foreach ($statements as $stmt) {
             $pdo->exec($stmt);
         }
@@ -100,7 +91,7 @@ class Install
         $role = $roleStmt->fetch();
 
         if ($role) {
-            $pdo->prepare('INSERT OR IGNORE INTO user_roles_map (user_id, role_id) VALUES (:uid, :rid)')
+            $pdo->prepare('INSERT IGNORE INTO user_roles_map (user_id, role_id) VALUES (:uid, :rid)')
                 ->execute([':uid' => $userId, ':rid' => $role['id']]);
         }
 
@@ -110,7 +101,7 @@ class Install
         $group = $grpStmt->fetch();
 
         if ($group) {
-            $pdo->prepare('INSERT OR IGNORE INTO user_groups_map (user_id, group_id) VALUES (:uid, :gid)')
+            $pdo->prepare('INSERT IGNORE INTO user_groups_map (user_id, group_id) VALUES (:uid, :gid)')
                 ->execute([':uid' => $userId, ':gid' => $group['id']]);
         }
     }
@@ -122,7 +113,7 @@ class Install
         $screenIds = $pdo->query('SELECT id FROM screens')->fetchAll(PDO::FETCH_COLUMN);
 
         $stmt = $pdo->prepare(
-            'INSERT OR IGNORE INTO user_screen (user_id, screen_id, permissions)
+            'INSERT IGNORE INTO user_screen (user_id, screen_id, permissions)
              VALUES (:uid, :sid, :perm)'
         );
         foreach ($screenIds as $screenId) {

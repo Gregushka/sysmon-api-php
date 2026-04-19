@@ -43,7 +43,7 @@ class UserAppSettingsRepository
         $db   = Database::get();
         $stmt = $db->prepare(
             'INSERT INTO user_app_settings (user_id, settings) VALUES (?, ?)
-             ON CONFLICT(user_id) DO UPDATE SET settings = excluded.settings'
+             ON DUPLICATE KEY UPDATE settings = VALUES(settings)'
         );
         $stmt->execute([$userId, json_encode($merged)]);
 
