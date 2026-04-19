@@ -84,7 +84,7 @@ INSERT IGNORE INTO aggregates (id, name, description) VALUES
 -- ─── Indicators ──────────────────────────────────────────────────────────────
 -- type_id resolved via front_name; unit_id is the units.id from the design doc
 
-INSERT IGNORE INTO indicators (id, ind_id, data_id, type_id, label, unit_id, top,  left,  radius, size, box, settings) VALUES
+INSERT IGNORE INTO indicators (id, ind_id, data_id, type_id, label, unit_id, top, `left`, radius, size, box, settings) VALUES
 (1,  'te_1-1',     'te_1-1',  1, 'TE1',       2,  830,  1960, 45,   NULL, NULL, '{"fontSize":30,"defaultBg":"#0a1a2a"}'),
 (2,  'pe_1-1',     'pe_1-1',  2, 'PE1',       1,  790,  1580, 45,   NULL, NULL, '{"fontSize":30,"defaultBg":"#0a1a2a"}'),
 (3,  'te_1-2',     NULL,      1, 'TE2',       2, 1270,  1425, NULL, NULL, NULL, '{"fontSize":26}'),
