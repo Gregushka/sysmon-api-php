@@ -57,7 +57,7 @@ class IndicatorRepository
 
     public function updatePosition(int $id, int $top, int $left): bool
     {
-        $stmt = $this->db->prepare('UPDATE indicators SET top = :top, left = :left WHERE id = :id');
+        $stmt = $this->db->prepare('UPDATE indicators SET top = :top, `left` = :left WHERE id = :id');
         $stmt->execute([':top' => $top, ':left' => $left, ':id' => $id]);
         return $stmt->rowCount() > 0;
     }
@@ -69,7 +69,7 @@ class IndicatorRepository
     public function findIndicatorInScreen(string $indId, int $screenId): ?array
     {
         $stmt = $this->db->prepare(
-            'SELECT i.id, i.ind_id, i.top, i.left,
+            'SELECT i.id, i.ind_id, i.top, i.`left`,
                     a.name AS aggregate_name, s.name AS screen_name
              FROM   indicators i
              JOIN   aggregate_indicator ai ON ai.indicator_id = i.id
