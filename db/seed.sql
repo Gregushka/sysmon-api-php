@@ -1,11 +1,11 @@
 -- sysmon-api-php: initial seed data
--- All inserts use INSERT OR IGNORE so this file is safe to re-run.
+-- All inserts use INSERT IGNORE so this file is safe to re-run.
 
-PRAGMA foreign_keys = ON;
+
 
 -- ─── Screen types ────────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO screen_types (id, name, description) VALUES
+INSERT IGNORE INTO screen_types (id, name, description) VALUES
 (1, 'indicators',  'Standard display screen: indicators reflect system status'),
 (2, 'users',       'List users and enables to create, delete, update users, groups and roles'),
 (3, 'positioning', 'Drag and drop positioning of indicators and controls on the selected background, adjust coords manually'),
@@ -15,7 +15,7 @@ INSERT OR IGNORE INTO screen_types (id, name, description) VALUES
 
 -- ─── Indicator types ─────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO indicator_types (id, name, front_name, description) VALUES
+INSERT IGNORE INTO indicator_types (id, name, front_name, description) VALUES
 (1, 'dig_ind',     'DigitalIndicator',    NULL),
 (2, 'dig_round',   'DigitalRound',        NULL),
 (3, 'on_off',      'OnOffIndicator',      NULL),
@@ -26,7 +26,7 @@ INSERT OR IGNORE INTO indicator_types (id, name, front_name, description) VALUES
 
 -- ─── Units ───────────────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO units (id, name, symbol, units) VALUES
+INSERT IGNORE INTO units (id, name, symbol, units) VALUES
 (1, 'Pressure',              'b',    'bar'),
 (2, 'Temperature',           '°C',   'celsius'),
 (3, 'Voltage',               'V',    'volt'),
@@ -38,13 +38,13 @@ INSERT OR IGNORE INTO units (id, name, symbol, units) VALUES
 
 -- ─── Control types ───────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO control_types (id, name, front_name, description) VALUES
+INSERT IGNORE INTO control_types (id, name, front_name, description) VALUES
 (1, 'Switch NC', 'Switch_NC', 'Normally closed switch'),
 (2, 'Switch NO', 'Switch_NO', 'Normally opened switch');
 
 -- ─── Backend commands ────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO backend_commands (command, response, description) VALUES
+INSERT IGNORE INTO backend_commands (command, response, description) VALUES
 ('force_update',         NULL, 'Use all indicator static data to update them at front and switch to specified screen if set'),
 ('front_version',        NULL, 'Response with front version'),
 ('available_indicators', NULL, 'List all indicator types defined at front'),
@@ -52,7 +52,7 @@ INSERT OR IGNORE INTO backend_commands (command, response, description) VALUES
 
 -- ─── Roles ───────────────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO roles (id, name, description, permissions) VALUES
+INSERT IGNORE INTO roles (id, name, description, permissions) VALUES
 (1, 'operator', 'Can view sensor data and basic operations',    '{"read":true,"write":false,"admin":false}'),
 (2, 'manager',  'Can manage shifts and view all data',          '{"read":true,"write":true,"admin":false}'),
 (3, 'admin',    'Can manage users and indicators',              '{"read":true,"write":true,"admin":true}'),
@@ -60,13 +60,13 @@ INSERT OR IGNORE INTO roles (id, name, description, permissions) VALUES
 
 -- ─── Groups ──────────────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO groups (id, name, description) VALUES
+INSERT IGNORE INTO groups (id, name, description) VALUES
 (1, 'crema',      NULL),
 (2, 'crema_full', NULL);
 
 -- ─── Screens ─────────────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO screens (id, type_id, name, description, tab_header, background, settings) VALUES
+INSERT IGNORE INTO screens (id, type_id, name, description, tab_header, background, settings) VALUES
 (1, 1, 'Pumps',       'Pumping Pumps Screen',                       'Pumps',       'diagram1.png', '{}'),
 (2, 1, 'Burners',     'Burning Burners Screen',                     'Burners',     'diagram2.png', '{}'),
 (3, 2, 'Users',       'User Management Screen',                     'Users',       'default',      '{}'),
@@ -77,14 +77,14 @@ INSERT OR IGNORE INTO screens (id, type_id, name, description, tab_header, backg
 
 -- ─── Aggregates ──────────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO aggregates (id, name, description) VALUES
+INSERT IGNORE INTO aggregates (id, name, description) VALUES
 (1, 'aggr_1', 'Pumps aggregate'),
 (2, 'aggr_2', 'Burners aggregate');
 
 -- ─── Indicators ──────────────────────────────────────────────────────────────
 -- type_id resolved via front_name; unit_id is the units.id from the design doc
 
-INSERT OR IGNORE INTO indicators (id, ind_id, data_id, type_id, label, unit_id, top,  left,  radius, size, box, settings) VALUES
+INSERT IGNORE INTO indicators (id, ind_id, data_id, type_id, label, unit_id, top,  left,  radius, size, box, settings) VALUES
 (1,  'te_1-1',     'te_1-1',  1, 'TE1',       2,  830,  1960, 45,   NULL, NULL, '{"fontSize":30,"defaultBg":"#0a1a2a"}'),
 (2,  'pe_1-1',     'pe_1-1',  2, 'PE1',       1,  790,  1580, 45,   NULL, NULL, '{"fontSize":30,"defaultBg":"#0a1a2a"}'),
 (3,  'te_1-2',     NULL,      1, 'TE2',       2, 1270,  1425, NULL, NULL, NULL, '{"fontSize":26}'),
@@ -123,7 +123,7 @@ INSERT OR IGNORE INTO indicators (id, ind_id, data_id, type_id, label, unit_id, 
 
 -- ─── Screen ↔ Aggregate ──────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO screen_aggregate (screen_id, aggregate_id) VALUES
+INSERT IGNORE INTO screen_aggregate (screen_id, aggregate_id) VALUES
 (1, 1),  -- Pumps → aggr_1
 (2, 2);  -- Burners → aggr_2
 
@@ -131,7 +131,7 @@ INSERT OR IGNORE INTO screen_aggregate (screen_id, aggregate_id) VALUES
 -- aggr_1 (Pumps): indicators 1-18
 -- aggr_2 (Burners): indicators 19-35
 
-INSERT OR IGNORE INTO aggregate_indicator (aggregate_id, indicator_id) VALUES
+INSERT IGNORE INTO aggregate_indicator (aggregate_id, indicator_id) VALUES
 (1, 1),(1, 2),(1, 3),(1, 4),(1, 5),(1, 6),(1, 7),(1, 8),(1, 9),(1,10),
 (1,11),(1,12),(1,13),(1,14),(1,15),(1,16),(1,17),(1,18),
 (2,19),(2,20),(2,21),(2,22),(2,23),(2,24),(2,25),(2,26),(2,27),
@@ -139,16 +139,16 @@ INSERT OR IGNORE INTO aggregate_indicator (aggregate_id, indicator_id) VALUES
 
 -- ─── Group → Screen / Aggregate ──────────────────────────────────────────────
 
-INSERT OR IGNORE INTO group_aggregate (group_id, aggregate_id) VALUES
+INSERT IGNORE INTO group_aggregate (group_id, aggregate_id) VALUES
 (1, 1);  -- crema → aggr_1
 
-INSERT OR IGNORE INTO group_screen (group_id, screen_id) VALUES
+INSERT IGNORE INTO group_screen (group_id, screen_id) VALUES
 (2, 1),  -- crema_full → Pumps
 (2, 2);  -- crema_full → Burners
 
 -- ─── API commands ────────────────────────────────────────────────────────────
 
-INSERT OR IGNORE INTO api_commands (id, command, method, description) VALUES
+INSERT IGNORE INTO api_commands (id, command, method, description) VALUES
 ( 1, '/v1/auth',                    'GET',    'Authenticate user'),
 ( 2, '/v1/users',                   'GET',    'List all users'),
 ( 3, '/v1/users/:id',               'GET',    'Get user by ID'),
@@ -184,21 +184,21 @@ INSERT OR IGNORE INTO api_commands (id, command, method, description) VALUES
 
 -- ─── Role → API command permissions ─────────────────────────────────────────
 -- operator (1): read-only access to own data, screens, indicators, live data + settings
-INSERT OR IGNORE INTO role_api_command (role_id, api_command_id) VALUES
+INSERT IGNORE INTO role_api_command (role_id, api_command_id) VALUES
 (1,1),(1,3),(1,9),(1,10),(1,14),(1,15),(1,16),(1,28),(1,29),(1,30),(1,31),(1,32);
 
 -- manager (2): operator + full user list, roles list, groups list, logs read + settings
-INSERT OR IGNORE INTO role_api_command (role_id, api_command_id) VALUES
+INSERT IGNORE INTO role_api_command (role_id, api_command_id) VALUES
 (2,1),(2,2),(2,3),(2,9),(2,10),(2,14),(2,15),(2,16),(2,18),(2,22),(2,26),(2,28),(2,29),(2,30),(2,31),(2,32);
 
 -- admin (3): manager + full user/screen/indicator/role/group management (no log clear, no delete roles/groups) + settings
-INSERT OR IGNORE INTO role_api_command (role_id, api_command_id) VALUES
+INSERT IGNORE INTO role_api_command (role_id, api_command_id) VALUES
 (3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7),(3,8),
 (3,9),(3,10),(3,11),(3,12),(3,13),(3,14),(3,15),(3,16),(3,17),
 (3,18),(3,19),(3,20),(3,22),(3,23),(3,24),(3,26),(3,28),(3,29),(3,30),(3,31),(3,32);
 
 -- almighty (4): everything
-INSERT OR IGNORE INTO role_api_command (role_id, api_command_id) VALUES
+INSERT IGNORE INTO role_api_command (role_id, api_command_id) VALUES
 (4,1),(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),(4,8),
 (4,9),(4,10),(4,11),(4,12),(4,13),(4,14),(4,15),(4,16),(4,17),
 (4,18),(4,19),(4,20),(4,21),(4,22),(4,23),(4,24),(4,25),
@@ -206,5 +206,5 @@ INSERT OR IGNORE INTO role_api_command (role_id, api_command_id) VALUES
 
 -- ─── App settings (single row) ───────────────────────────────────────────────
 
-INSERT OR IGNORE INTO app_settings (id, display_screen, status, status_text, system_status, system_status_text, header) VALUES
+INSERT IGNORE INTO app_settings (id, display_screen, status, status_text, system_status, system_status_text, header) VALUES
 (1, 0, 0, 'OK', 0, 'System OK', 'SCADA System');
