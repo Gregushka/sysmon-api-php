@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     user_agent  TEXT,
     PRIMARY KEY (id),
     UNIQUE KEY uq_sessions_token (token),
+    KEY idx_sessions_expires_at (expires_at),
     CONSTRAINT fk_sessions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -262,7 +263,9 @@ CREATE TABLE IF NOT EXISTS logs (
     data_was           JSON,
     data_is            JSON,
     http_status_code   INT,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    KEY idx_logs_timestamp   (timestamp),
+    KEY idx_logs_error_level (error_level)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ─── Settings ─────────────────────────────────────────────────────────────────
@@ -287,15 +290,5 @@ CREATE TABLE IF NOT EXISTS app_settings (
     settings            JSON         NOT NULL,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- ─── Indexes ──────────────────────────────────────────────────────────────────
-
-CREATE INDEX idx_sessions_user_id    ON sessions(user_id);
-CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
-CREATE INDEX idx_logs_timestamp      ON logs(timestamp);
-CREATE INDEX idx_logs_error_level    ON logs(error_level);
-CREATE INDEX idx_aggind_aggregate    ON aggregate_indicator(aggregate_id);
-CREATE INDEX idx_scrnagg_screen      ON screen_aggregate(screen_id);
-CREATE INDEX idx_user_screen_user    ON user_screen(user_id);
 
 SET FOREIGN_KEY_CHECKS = 1;
