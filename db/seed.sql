@@ -121,6 +121,9 @@ INSERT IGNORE INTO indicators (id, ind_id, data_id, type_id, label, unit_id, top
 (34, 'di-vol',     NULL,      1, 'Volume',    7,   400,   200, NULL, NULL, NULL, '{"bg_id":"diagram2","fontSize":26}'),
 (35, 'pds2',       NULL,      3, 'PDS 2',     NULL, 600,  800, 36,   NULL, NULL, '{"bg_id":"diagram2","color":"#00e676"}');
 
+UPDATE indicators SET direction = 90
+WHERE ind_id IN ('burner_one', 'burner_two', 'burner_three', 'burner_flap');
+
 -- ─── Screen ↔ Aggregate ──────────────────────────────────────────────────────
 
 INSERT IGNORE INTO screen_aggregate (screen_id, aggregate_id) VALUES

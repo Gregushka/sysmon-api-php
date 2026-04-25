@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS indicators (
     value_font  JSON,
     radius      INT,
     size        INT,
+    direction   INT,
     box         JSON,
     settings    JSON,
     PRIMARY KEY (id),

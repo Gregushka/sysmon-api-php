@@ -31,6 +31,7 @@ class IndicatorController
                 'value'     => $mockValues[$row['ind_id']] ?? null,
                 'screen'    => $row['screen_name'],
                 'aggregate' => $row['aggregate_name'],
+                'direction' => isset($row['direction']) ? (int)$row['direction'] : null,
             ];
         }
 
