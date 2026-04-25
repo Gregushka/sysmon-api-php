@@ -15,6 +15,7 @@ class Indicator
     public ?array  $valueFont;
     public ?int    $radius;
     public ?int    $size;
+    public ?int    $direction;
     public ?array  $box;
     public ?array  $settings;
     public mixed   $value = null;  // runtime value from mock / data source
@@ -32,9 +33,10 @@ class Indicator
         $this->labelFont = isset($row['label_font'])  ? json_decode($row['label_font'],  true) : null;
         $this->unitFont  = isset($row['unit_font'])   ? json_decode($row['unit_font'],   true) : null;
         $this->valueFont = isset($row['value_font'])  ? json_decode($row['value_font'],  true) : null;
-        $this->radius    = isset($row['radius']) ? (int)$row['radius'] : null;
-        $this->size      = isset($row['size'])   ? (int)$row['size']   : null;
-        $this->box       = isset($row['box'])      ? json_decode($row['box'],      true) : null;
+        $this->radius    = isset($row['radius'])    ? (int)$row['radius']    : null;
+        $this->size      = isset($row['size'])      ? (int)$row['size']      : null;
+        $this->direction = isset($row['direction']) ? (int)$row['direction'] : null;
+        $this->box       = isset($row['box'])       ? json_decode($row['box'],      true) : null;
         $this->settings  = isset($row['settings']) ? json_decode($row['settings'], true) : null;
     }
 
@@ -54,6 +56,7 @@ class Indicator
             'value_font'  => $this->valueFont,
             'radius'      => $this->radius,
             'size'        => $this->size,
+            'direction'   => $this->direction,
             'box'         => $this->box,
             'settings'    => $this->settings,
             'value'       => $this->value,
