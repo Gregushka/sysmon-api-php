@@ -1,0 +1,16 @@
+Options -Indexes
+
+# Route all requests through index.php
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Block direct access to sensitive directories
+RewriteRule ^(db|config|setup|repositories|models|utils|middleware|controllers|routes)/  - [F,L]
+
+# Security headers
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
