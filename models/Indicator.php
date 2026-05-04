@@ -16,6 +16,9 @@ class Indicator
     public ?int    $radius;
     public ?int    $size;
     public ?int    $direction;
+    public ?int    $minValue;
+    public ?int    $maxValue;
+    public ?int    $afterDecimal;
     public ?array  $box;
     public ?array  $settings;
     public mixed   $value = null;  // runtime value from mock / data source
@@ -35,8 +38,11 @@ class Indicator
         $this->valueFont = isset($row['value_font'])  ? json_decode($row['value_font'],  true) : null;
         $this->radius    = isset($row['radius'])    ? (int)$row['radius']    : null;
         $this->size      = isset($row['size'])      ? (int)$row['size']      : null;
-        $this->direction = isset($row['direction']) ? (int)$row['direction'] : null;
-        $this->box       = isset($row['box'])       ? json_decode($row['box'],      true) : null;
+        $this->direction    = isset($row['direction'])    ? (int)$row['direction']    : null;
+        $this->minValue     = isset($row['min_value'])     ? (int)$row['min_value']     : null;
+        $this->maxValue     = isset($row['max_value'])     ? (int)$row['max_value']     : null;
+        $this->afterDecimal = isset($row['after_decimal']) ? (int)$row['after_decimal'] : null;
+        $this->box          = isset($row['box'])           ? json_decode($row['box'],      true) : null;
         $this->settings  = isset($row['settings']) ? json_decode($row['settings'], true) : null;
     }
 
@@ -56,8 +62,11 @@ class Indicator
             'value_font'  => $this->valueFont,
             'radius'      => $this->radius,
             'size'        => $this->size,
-            'direction'   => $this->direction,
-            'box'         => $this->box,
+            'direction'     => $this->direction,
+            'min_value'     => $this->minValue,
+            'max_value'     => $this->maxValue,
+            'after_decimal' => $this->afterDecimal,
+            'box'           => $this->box,
             'settings'    => $this->settings,
             'value'       => $this->value,
         ];

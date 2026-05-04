@@ -31,7 +31,10 @@ class IndicatorController
                 'value'     => $mockValues[$row['ind_id']] ?? null,
                 'screen'    => $row['screen_name'],
                 'aggregate' => $row['aggregate_name'],
-                'direction' => isset($row['direction']) ? (int)$row['direction'] : null,
+                'direction'     => isset($row['direction'])    ? (int)$row['direction']    : null,
+                'min_value'     => isset($row['min_value'])     ? (int)$row['min_value']     : null,
+                'max_value'     => isset($row['max_value'])     ? (int)$row['max_value']     : null,
+                'after_decimal' => isset($row['after_decimal']) ? (int)$row['after_decimal'] : null,
             ];
         }
 
